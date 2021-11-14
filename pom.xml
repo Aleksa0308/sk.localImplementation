@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.raf.sk.localImplementation</groupId>
-    <artifactId>sk.localImplementation</artifactId>
+    <artifactId>localImplementation</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
