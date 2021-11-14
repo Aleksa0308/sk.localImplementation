@@ -179,7 +179,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public @NotNull DirectoryBuilder initStorage(String s) {
-        Path path = Path.of(s);
+        Path path = Path.of(Paths.get(s).toAbsolutePath().toString());
         String s2 = path.getParent().toString();
         File theFile = new File(s2);
             if(theFile.isDirectory()) {
