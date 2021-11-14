@@ -4,6 +4,7 @@ import com.raf.sk.specification.builders.DirectoryBuilder;
 import com.raf.sk.specification.builders.FileBuilder;
 import com.raf.sk.specification.exceptions.IOManagerNoDriverException;
 import com.raf.sk.specification.io.IODriver;
+import com.raf.sk.specification.io.IOManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -14,6 +15,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 public class LocalImplementation implements IODriver {
+
+    static {
+        IOManager.setIODriver(new LocalImplementation());
+    }
 
     @Override
     public void makeDirectory(String s) {
