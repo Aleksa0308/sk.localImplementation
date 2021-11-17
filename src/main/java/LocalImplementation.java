@@ -118,6 +118,16 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public FileBuilder uploadFile(String s, String s1) {
+        File targetPath = new File(s);
+        File sourceFile = new File(s1);
+        if(sourceFile.isFile() && targetPath.isDirectory()){
+            try {
+                Files.copy(sourceFile.toPath(), targetPath.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+                return new FileBuilder(new DirectoryBuilder(), sourceFile.getName(), sourceFile.getTotalSpace());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         return null;
     }
@@ -137,32 +147,13 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public String readConfig(String s) {
+        String result = null;
         try {
-            // create Gson instance
-            Gson gson = new Gson();
-
-            // create a reader
-            Reader reader = Files.newBufferedReader(Paths.get(s));
-
-            // convert JSON file to map
-            Map<?, ?> map = gson.fromJson(reader, Map.class);
-
-            // print map entries
-            StringBuilder mapAsString = new StringBuilder("{");
-            for (Object key : map.keySet()) {
-                mapAsString.append(key + "=" + map.get(key) + ", ");
-            }
-            mapAsString.delete(mapAsString.length()-2, mapAsString.length()).append("}");
-            System.out.println(mapAsString.toString());
-            //return mapAsString.toString();
-
-            // close reader
-            reader.close();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            result = Files.readString(Path.of(s));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return null;
+        return result;
     }
 
     @Override
