@@ -18,6 +18,8 @@ import java.nio.file.StandardCopyOption;
 
 public class LocalImplementation implements IODriver {
 
+    private static final String INODE_SEPARATOR = "/";
+
     static {
         IOManager.setIODriver(new LocalImplementation());
     }
@@ -26,7 +28,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void makeDirectory(String s) {
-        Path path = Path.of(srcPath + s);
+        Path path = Path.of(resolvePath(s));
         if (Files.exists(path)) {
             System.out.println("Directory already exists.");
         } else {
@@ -41,7 +43,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void makeFile(String s) {
-        Path path = Path.of(srcPath + s);
+        Path path = Path.of(resolvePath(s));
         if (Files.exists(path)) {
             System.out.println("File already exists.");
         } else {
@@ -56,7 +58,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void deleteDirectory(String s) {
-        Path path = Path.of(srcPath + s);
+        Path path = Path.of(resolvePath(s));
         try {
             /*
             #TODO ovde dolazi do DirectoryNotEmptyException greške kada direktorijum nije prazan:
@@ -73,7 +75,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void deleteFile(String s) {
-        Path path = Path.of(srcPath + s);
+        Path path = Path.of(resolvePath(s));
         try {
             Files.deleteIfExists(path);
         } catch (IOException e) {
@@ -83,8 +85,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void moveDirectory(String s, String s1) {
-        s = srcPath + s;
-        s1 = srcPath + s1;
+        s = resolvePath(s);
+        s1 = resolvePath(s1);
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
         if (!sourceDir.isDirectory()) {
@@ -107,8 +109,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void moveFile(String s, String s1) {
-        s = srcPath + s;
-        s1 = srcPath + s1;
+        s = resolvePath(s);
+        s1 = resolvePath(s1);
         File sourceFile = new File(s);
         File targetDir = new File(s1 + "\\" + sourceFile.getName());
         if (!sourceFile.isDirectory()) {
@@ -131,12 +133,12 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void downloadDirectory(String s, String s1) {
-        s = srcPath + s;
-        s1 = srcPath + s1;
+        s = resolvePath(s);
+        // s1 je apsolutna
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
         if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
-            File targetDir = new File(s1 + "\\" + sourceDir.getName());
+            File targetDir = new File(s1 + System.getProperty("file.separator") + sourceDir.getName());
             try {
                 Files.copy(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
             } catch (IOException e) {
@@ -147,8 +149,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public FileBuilder uploadFile(String s, String s1) {
-        s = srcPath + s;
-        s1 = srcPath + s1;
+        // s je apsolutna
+        s1 = resolvePath(s1);
         File targetPath = new File(s);
         File sourceFile = new File(s1);
         if (sourceFile.isFile() && targetPath.isDirectory()) {
@@ -165,10 +167,10 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void downloadFile(String s, String s1) {
-        s = srcPath + s;
-        s1 = srcPath + s1;
+        s = resolvePath(s);
+        // s1 je apsolutna
         File sourceFile = new File(s);
-        File targetFile = new File(s1 + "\\" + sourceFile.getName());
+        File targetFile = new File(s1 + System.getProperty("file.separator") + sourceFile.getName());
         if (sourceFile.isFile()) {
             try {
                 Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
@@ -217,6 +219,31 @@ public class LocalImplementation implements IODriver {
                     "Cannot initiate root on file!"
             );
         }
+    }
+
+    /**
+     * Pretvara path koji je dala aplikacija u apsolutni path za korisničko okruženje. Može se pozivati SAMO nakon
+     * inicijalnog čitanja direktorijuma.
+     *
+     * @param appPath Path iz aplikacije.
+     * @return Krajnji path.
+     */
+    private String resolvePath(String appPath) {
+        if (srcPath == null)
+            throw new IODriverException(
+                    "Programming error: you cannot call resolvePath() before reading the config!"
+            );
+
+        String sep = System.getProperty("file.separator");
+        if (!srcPath.endsWith(sep)) {
+            srcPath = srcPath + sep;
+        }
+
+        if (appPath.startsWith(INODE_SEPARATOR))
+            appPath = appPath.substring(1);
+
+        appPath = appPath.replaceAll(INODE_SEPARATOR, sep);
+        return srcPath + sep + appPath;
     }
 
     /**
