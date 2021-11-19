@@ -19,7 +19,7 @@ import java.nio.file.StandardCopyOption;
 public class LocalImplementation implements IODriver {
 
     static {
-        //IOManager.setIODriver(new LocalImplementation());
+        IOManager.setIODriver(new LocalImplementation());
     }
 
     private String srcPath;
@@ -208,7 +208,7 @@ public class LocalImplementation implements IODriver {
      * @return Vraća korensko DirectoryBuilder stablo.
      */
     private INodeBuilder traverse(DirectoryBuilder parent, File file) {
-        for (File f: file.listFiles()) {
+        for (File f : file.listFiles()) {
             if (f.isFile()) {
                 parent.addChild(new FileBuilder(
                         parent,
