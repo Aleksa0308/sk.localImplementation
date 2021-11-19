@@ -137,6 +137,7 @@ public class LocalImplementation implements IODriver {
         if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
             File targetDir = new File(s1 + getSeparator() + sourceDir.getName());
             try {
+                // #TODO ovde se ne kopira sadržaj! dodati da može sadržaj da se kopira
                 Files.copy(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
             } catch (IOException e) {
                 e.printStackTrace();
