@@ -98,6 +98,21 @@ public class LocalImplementation implements IODriver {
         }
         File targetDir = new File(s1 + getSeparator() + sourceDir.getName());
         try {
+            // #TODO ovde je moguće dobiti access error? Da li je ovo zbog implementacije ili samog okruženja?
+            /*
+            java.nio.file.AccessDeniedException: D:\fax\semestar-5\sk\projekat\sk\cli\target\maven-status -> D:\fax\semestar-5\sk\projekat\sk\cli\target\classes\maven-status
+                at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:89)
+                at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+                at java.base/sun.nio.fs.WindowsFileCopy.move(WindowsFileCopy.java:395)
+                at java.base/sun.nio.fs.WindowsFileSystemProvider.move(WindowsFileSystemProvider.java:292)
+                at java.base/java.nio.file.Files.move(Files.java:1426)
+                at com.raf.sk.localImplementation.LocalImplementation.moveDirectory(LocalImplementation.java:101)
+                at com.raf.sk.core.repository.Directory.move(Directory.java:250)
+                at com.raf.sk.core.repository.INode.move(INode.java:146)
+                at com.raf.sk.core.actions.ActionINodeMove.run(ActionINodeMove.java:64)
+                at com.raf.sk.core.actions.ActionManager.run(ActionManager.java:50)
+                at com.raf.sk.cli.Main.main(Main.java:290)
+             */
             Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,11 +162,11 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public FileBuilder uploadFile(String s, String s1) {
-        // s je apsolutna
-        s1 = resolvePath(s1);
-        File targetPath = new File(s);
+        s = resolvePath(s);
+        // s1 je apsolutna
         File sourceFile = new File(s1);
-        if (sourceFile.isFile() && targetPath.isDirectory()) {
+        File targetPath = new File(s + getSeparator() + sourceFile.getName());
+        if (sourceFile.isFile()) {
             try {
                 Files.copy(sourceFile.toPath(), targetPath.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
                 return new FileBuilder(new DirectoryBuilder(), sourceFile.getName(), sourceFile.getTotalSpace());
