@@ -58,8 +58,14 @@ public class LocalImplementation implements IODriver {
     public void deleteDirectory(String s) {
         Path path = Path.of(srcPath + s);
         try {
+            /*
+            #TODO ovde dolazi do DirectoryNotEmptyException greške kada direktorijum nije prazan:
+            java.nio.file.DirectoryNotEmptyException: D:\fax\semestar-5\sk\projekat\sk\cli\target\maven-status
+            at java.base/sun.nio.fs.WindowsFileSystemProvider.implDelete(WindowsFileSystemProvider.java:271)
+            at java.base/sun.nio.fs.AbstractFileSystemProvider.deleteIfExists(AbstractFileSystemProvider.java:110)
+            at
+            */
             Files.deleteIfExists(path);
-            System.out.println("[DIRECTORY]: " + path.getFileName() + " has been deleted!");
         } catch (IOException e) {
             e.printStackTrace();
         }
