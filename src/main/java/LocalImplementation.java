@@ -20,9 +20,11 @@ public class LocalImplementation implements IODriver {
         IOManager.setIODriver(new LocalImplementation());
     }
 
+    private String srcPath;
+
     @Override
     public void makeDirectory(String s) {
-        Path path = Path.of(s);
+        Path path = Path.of(srcPath + s);
         if(Files.exists(path)){
             System.out.println("Directory already exists.");
         }else{
@@ -37,7 +39,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void makeFile(String s) {
-        Path path = Path.of(s);
+        Path path = Path.of(srcPath + s);
         if(Files.exists(path)){
             System.out.println("File already exists.");
         }else{
@@ -52,7 +54,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void deleteDirectory(String s) {
-        Path path = Path.of(s);
+        Path path = Path.of(srcPath + s);
         try {
             Files.deleteIfExists(path);
             System.out.println("[DIRECTORY]: " + path.getFileName() + " has been deleted!");
@@ -63,7 +65,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void deleteFile(String s) {
-        Path path = Path.of(s);
+        Path path = Path.of(srcPath + s);
         try {
             Files.deleteIfExists(path);
             System.out.println("[FILE]: " + path.getFileName() + " has been deleted!");
@@ -74,6 +76,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void moveDirectory(String s, String s1) {
+        s = srcPath + s;
+        s1 = srcPath + s1;
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
         if(sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
@@ -89,6 +93,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void moveFile(String s, String s1) {
+        s = srcPath + s;
+        s1 = srcPath + s1;
         File sourceFile = new File(s);
         File targetFile = new File(s1 + "\\" + sourceFile.getName());
         if(sourceFile.isFile()) {
@@ -104,6 +110,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void downloadDirectory(String s, String s1) {
+        s = srcPath + s;
+        s1 = srcPath + s1;
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
         if(sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
@@ -118,6 +126,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public FileBuilder uploadFile(String s, String s1) {
+        s = srcPath + s;
+        s1 = srcPath + s1;
         File targetPath = new File(s);
         File sourceFile = new File(s1);
         if(sourceFile.isFile() && targetPath.isDirectory()){
@@ -134,6 +144,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void downloadFile(String s, String s1) {
+        s = srcPath + s;
+        s1 = srcPath + s1;
         File sourceFile = new File(s);
         File targetFile = new File(s1 + "\\" + sourceFile.getName());
         if(sourceFile.isFile()) {
@@ -147,6 +159,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public String readConfig(String s) {
+        s = srcPath + s;
         String result = null;
         try {
             result = Files.readString(Path.of(s));
@@ -158,6 +171,8 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public void writeConfig(String s, String s1) {
+        s = srcPath + s;
+        s1 = srcPath + s1;
         File targetFile = new File(s1);
         try {
             FileWriter fileWriter = new FileWriter(targetFile);
@@ -170,6 +185,11 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public @NotNull DirectoryBuilder initStorage(String s) {
+        if (s.endsWith("/"))
+            this.srcPath = s;
+        else
+            this.srcPath = s + "/";
+        s = srcPath;
         Path path = Path.of(Paths.get(s).toAbsolutePath().toString());
         String s2 = path.getParent().toString();
         File theFile = new File(s2);
