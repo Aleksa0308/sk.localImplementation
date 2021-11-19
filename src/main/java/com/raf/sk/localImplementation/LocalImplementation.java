@@ -161,7 +161,7 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public String readConfig(String absPath) {
-        Path path = Path.of(Paths.get(srcPath).toAbsolutePath().toString());
+        Path path = Path.of(Paths.get(absPath).toAbsolutePath().toString());
         srcPath = path.getParent().toString();
         try {
             return Files.readString(Path.of(absPath));
