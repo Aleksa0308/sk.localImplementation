@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 
 public class LocalImplementation implements IODriver {
 
@@ -58,7 +59,10 @@ public class LocalImplementation implements IODriver {
     public void deleteDirectory(String s) {
         Path path = Path.of(srcPath + s);
         try {
-            Files.deleteIfExists(path);
+            Files.walk(path)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
             System.out.println("[DIRECTORY]: " + path.getFileName() + " has been deleted!");
         } catch (IOException e) {
             e.printStackTrace();
