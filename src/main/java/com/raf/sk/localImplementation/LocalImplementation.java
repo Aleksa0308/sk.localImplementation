@@ -1,8 +1,7 @@
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
+package com.raf.sk.localImplementation;
+
 import com.raf.sk.specification.builders.DirectoryBuilder;
 import com.raf.sk.specification.builders.FileBuilder;
-import com.raf.sk.specification.exceptions.IOManagerNoDriverException;
 import com.raf.sk.specification.io.IODriver;
 import com.raf.sk.specification.io.IOManager;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Map;
 
 public class LocalImplementation implements IODriver {
 
@@ -195,6 +193,11 @@ public class LocalImplementation implements IODriver {
         File theFile = new File(s2);
             if(theFile.isDirectory()) {
                 File[] files = theFile.listFiles();
+                if (files == null) {
+                    throw new RuntimeException(
+                            "LocalImplementation: files[] object is null!"
+                    );
+                }
                 if (files.length == 0) {
                     try {
                         Files.createDirectory(path);
