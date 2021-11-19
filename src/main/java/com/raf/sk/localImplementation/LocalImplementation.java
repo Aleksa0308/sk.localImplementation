@@ -83,7 +83,7 @@ public class LocalImplementation implements IODriver {
     @Override
     public void moveDirectory(String s, String s1) {
         s = resolvePath(s);
-        s1 = resolvePath(s1);
+        s1 = Path.of(resolvePath(s1)).getParent().toString();
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
         if (!sourceDir.isDirectory()) {
@@ -107,10 +107,10 @@ public class LocalImplementation implements IODriver {
     @Override
     public void moveFile(String s, String s1) {
         s = resolvePath(s);
-        s1 = resolvePath(s1);
+        String dest = Path.of(resolvePath(s1)).getParent().toString();
         File sourceFile = new File(s);
-        File targetDir = new File(s1 + getSeparator() + sourceFile.getName());
-        if (!sourceFile.isDirectory()) {
+        File targetDir = new File(dest);
+        if (!sourceFile.isFile()) {
             throw new IODriverException(
                     "Source node is not a file: " + s
             );
@@ -121,7 +121,7 @@ public class LocalImplementation implements IODriver {
             );
         }
         try {
-            Files.move(sourceFile.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(sourceFile.toPath(), Path.of(resolvePath(s1)), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
