@@ -93,7 +93,7 @@ public class LocalImplementation implements IODriver {
         }
         if (!targetDirTmp.isDirectory()) {
             throw new IODriverException(
-                    "Target node is not a directory: " + s
+                    "Dest node is not a directory: " + s1
             );
         }
         File targetDir = new File(s1 + getSeparator() + sourceDir.getName());
