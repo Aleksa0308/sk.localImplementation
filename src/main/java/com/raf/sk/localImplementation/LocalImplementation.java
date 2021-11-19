@@ -157,21 +157,20 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public String readConfig(String s) {
-        s = srcPath + s;
         String result = null;
         try {
             result = Files.readString(Path.of(s));
         } catch (IOException e) {
+            // #TODO ovde treba napraviti novi fajl
             e.printStackTrace();
+            return null;
         }
         return result;
     }
 
     @Override
-    public void writeConfig(String s, String s1) {
-        s = srcPath + s;
-        s1 = srcPath + s1;
-        File targetFile = new File(s1);
+    public void writeConfig(String s, String absPath) {
+        File targetFile = new File(absPath);
         try {
             FileWriter fileWriter = new FileWriter(targetFile);
             fileWriter.write(s);
@@ -187,7 +186,6 @@ public class LocalImplementation implements IODriver {
             this.srcPath = s;
         else
             this.srcPath = s + "/";
-        s = srcPath;
         Path path = Path.of(Paths.get(s).toAbsolutePath().toString());
         String s2 = path.getParent().toString();
         File theFile = new File(s2);
