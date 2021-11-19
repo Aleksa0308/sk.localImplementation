@@ -76,7 +76,6 @@ public class LocalImplementation implements IODriver {
         Path path = Path.of(srcPath + s);
         try {
             Files.deleteIfExists(path);
-            System.out.println("[FILE]: " + path.getFileName() + " has been deleted!");
         } catch (IOException e) {
             e.printStackTrace();
         }
