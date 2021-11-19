@@ -65,7 +65,6 @@ public class LocalImplementation implements IODriver {
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-            System.out.println("[DIRECTORY] deleted!");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,7 +96,7 @@ public class LocalImplementation implements IODriver {
                     "Target node is not a directory: " + s
             );
         }
-        File targetDir = new File(s1 + "\\" + sourceDir.getName());
+        File targetDir = new File(s1 + System.getProperty("file.separator") + sourceDir.getName());
         try {
             Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -110,7 +109,7 @@ public class LocalImplementation implements IODriver {
         s = resolvePath(s);
         s1 = resolvePath(s1);
         File sourceFile = new File(s);
-        File targetDir = new File(s1 + "\\" + sourceFile.getName());
+        File targetDir = new File(s1 + System.getProperty("file.separator") + sourceFile.getName());
         if (!sourceFile.isDirectory()) {
             throw new IODriverException(
                     "Source node is not a file: " + s
