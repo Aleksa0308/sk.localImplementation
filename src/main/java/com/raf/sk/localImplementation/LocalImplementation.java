@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Comparator;
 
 public class LocalImplementation implements IODriver {
 
@@ -59,11 +58,14 @@ public class LocalImplementation implements IODriver {
     public void deleteDirectory(String s) {
         Path path = Path.of(srcPath + s);
         try {
-            Files.walk(path)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-            System.out.println("[DIRECTORY]: " + path.getFileName() + " has been deleted!");
+            /*
+            #TODO ovde dolazi do DirectoryNotEmptyException greške kada direktorijum nije prazan:
+            java.nio.file.DirectoryNotEmptyException: D:\fax\semestar-5\sk\projekat\sk\cli\target\maven-status
+            at java.base/sun.nio.fs.WindowsFileSystemProvider.implDelete(WindowsFileSystemProvider.java:271)
+            at java.base/sun.nio.fs.AbstractFileSystemProvider.deleteIfExists(AbstractFileSystemProvider.java:110)
+            at
+            */
+            Files.deleteIfExists(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,7 +76,6 @@ public class LocalImplementation implements IODriver {
         Path path = Path.of(srcPath + s);
         try {
             Files.deleteIfExists(path);
-            System.out.println("[FILE]: " + path.getFileName() + " has been deleted!");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,14 +87,21 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
-        if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
-            File targetDir = new File(s1 + "\\" + sourceDir.getName());
-            try {
-                Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("[DIRECTORY]: " + sourceDir.getName() + " successfully moved to " + targetDir);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (!sourceDir.isDirectory()) {
+            throw new IODriverException(
+                    "Source node is not a directory: " + s
+            );
+        }
+        if (!targetDirTmp.isDirectory()) {
+            throw new IODriverException(
+                    "Target node is not a directory: " + s
+            );
+        }
+        File targetDir = new File(s1 + "\\" + sourceDir.getName());
+        try {
+            Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -102,14 +110,21 @@ public class LocalImplementation implements IODriver {
         s = srcPath + s;
         s1 = srcPath + s1;
         File sourceFile = new File(s);
-        File targetFile = new File(s1 + "\\" + sourceFile.getName());
-        if (sourceFile.isFile()) {
-            try {
-                Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("[FILE]: " + sourceFile.getName() + " successfully moved to " + targetFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        File targetDir = new File(s1 + "\\" + sourceFile.getName());
+        if (!sourceFile.isDirectory()) {
+            throw new IODriverException(
+                    "Source node is not a file: " + s
+            );
+        }
+        if (!targetDir.isDirectory()) {
+            throw new IODriverException(
+                    "Target node is not a directory: " + s1
+            );
+        }
+        try {
+            Files.move(sourceFile.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
