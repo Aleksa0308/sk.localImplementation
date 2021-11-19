@@ -96,7 +96,7 @@ public class LocalImplementation implements IODriver {
                     "Target node is not a directory: " + s
             );
         }
-        File targetDir = new File(s1 + System.getProperty("file.separator") + sourceDir.getName());
+        File targetDir = new File(s1 + getSeparator() + sourceDir.getName());
         try {
             Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -109,7 +109,7 @@ public class LocalImplementation implements IODriver {
         s = resolvePath(s);
         s1 = resolvePath(s1);
         File sourceFile = new File(s);
-        File targetDir = new File(s1 + System.getProperty("file.separator") + sourceFile.getName());
+        File targetDir = new File(s1 + getSeparator() + sourceFile.getName());
         if (!sourceFile.isDirectory()) {
             throw new IODriverException(
                     "Source node is not a file: " + s
@@ -135,7 +135,7 @@ public class LocalImplementation implements IODriver {
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
         if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
-            File targetDir = new File(s1 + System.getProperty("file.separator") + sourceDir.getName());
+            File targetDir = new File(s1 + getSeparator() + sourceDir.getName());
             try {
                 Files.copy(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
             } catch (IOException e) {
@@ -167,7 +167,7 @@ public class LocalImplementation implements IODriver {
         s = resolvePath(s);
         // s1 je apsolutna
         File sourceFile = new File(s);
-        File targetFile = new File(s1 + System.getProperty("file.separator") + sourceFile.getName());
+        File targetFile = new File(s1 + getSeparator() + sourceFile.getName());
         if (sourceFile.isFile()) {
             try {
                 Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
@@ -219,6 +219,17 @@ public class LocalImplementation implements IODriver {
     }
 
     /**
+     * Vraća sistemski fajl separator.
+     *
+     * @return Sistemski fajl separator.
+     */
+    private String getSeparator() {
+        String t = System.getProperty("file.separator");
+        if (t.equals("\\")) t = "\\\\"; // fix za windows
+        return t;
+    }
+
+    /**
      * Pretvara path koji je dala aplikacija u apsolutni path za korisničko okruženje. Može se pozivati SAMO nakon
      * inicijalnog čitanja direktorijuma.
      *
@@ -231,7 +242,7 @@ public class LocalImplementation implements IODriver {
                     "Programming error: you cannot call resolvePath() before reading the config!"
             );
 
-        String sep = System.getProperty("file.separator");
+        String sep = getSeparator();
         if (!srcPath.endsWith(sep)) {
             srcPath = srcPath + sep;
         }
