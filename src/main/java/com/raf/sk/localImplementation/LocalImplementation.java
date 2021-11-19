@@ -224,9 +224,7 @@ public class LocalImplementation implements IODriver {
      * @return Sistemski fajl separator.
      */
     private String getSeparator() {
-        String t = System.getProperty("file.separator");
-        if (t.equals("\\")) t = "\\\\"; // fix za windows
-        return t;
+        return System.getProperty("file.separator");
     }
 
     /**
@@ -250,8 +248,9 @@ public class LocalImplementation implements IODriver {
         if (appPath.startsWith(INODE_SEPARATOR))
             appPath = appPath.substring(1);
 
+        if (sep.equals("\\")) sep = "\\\\";
         appPath = appPath.replaceAll(INODE_SEPARATOR, sep);
-        return srcPath + sep + appPath;
+        return srcPath + appPath;
     }
 
     /**
