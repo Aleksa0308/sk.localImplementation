@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 
 public class LocalImplementation implements IODriver {
 
@@ -60,14 +61,11 @@ public class LocalImplementation implements IODriver {
     public void deleteDirectory(String s) {
         Path path = Path.of(resolvePath(s));
         try {
-            /*
-            #TODO ovde dolazi do DirectoryNotEmptyException greške kada direktorijum nije prazan:
-            java.nio.file.DirectoryNotEmptyException: D:\fax\semestar-5\sk\projekat\sk\cli\target\maven-status
-            at java.base/sun.nio.fs.WindowsFileSystemProvider.implDelete(WindowsFileSystemProvider.java:271)
-            at java.base/sun.nio.fs.AbstractFileSystemProvider.deleteIfExists(AbstractFileSystemProvider.java:110)
-            at
-            */
-            Files.deleteIfExists(path);
+            Files.walk(path)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            System.out.println("[DIRECTORY] deleted!");
         } catch (IOException e) {
             e.printStackTrace();
         }
