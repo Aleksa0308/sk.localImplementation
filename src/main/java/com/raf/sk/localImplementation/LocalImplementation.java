@@ -191,7 +191,8 @@ public class LocalImplementation implements IODriver {
             // #TODO ovo pokriva samo slučaj da je pozvan na direktorijumu koji postoji.
             // Dodati slučaj ako je metoda pozvana na path-u koji ne postoji (kreirati novi path i vratiti prazan
             // DirectoryBuilder)
-            return (DirectoryBuilder) traverse(null, root);
+            DirectoryBuilder db = new DirectoryBuilder(null, DirectoryBuilder.ROOT_DIRECTORY);
+            return (DirectoryBuilder) traverse(db, root);
         } else {
             throw new IODriverException(
                     "Cannot initiate root on file!"
@@ -207,24 +208,22 @@ public class LocalImplementation implements IODriver {
      * @return Vraća korensko DirectoryBuilder stablo.
      */
     private INodeBuilder traverse(DirectoryBuilder parent, File file) {
-        if (file.isFile()) {
-            return new FileBuilder(
-                    parent,
-                    file.getName(),
-                    file.length()
-            );
+        for (File f: file.listFiles()) {
+            if (f.isFile()) {
+                parent.addChild(new FileBuilder(
+                        parent,
+                        file.getName(),
+                        file.length()
+                ));
+            } else {
+                DirectoryBuilder db = new DirectoryBuilder(
+                        parent,
+                        file.getName()
+                );
+                parent.addChild(db);
+                traverse(db, f);
+            }
         }
-
-        DirectoryBuilder dir;
-        if (parent == null)
-            dir = new DirectoryBuilder(null, DirectoryBuilder.ROOT_DIRECTORY);
-        else
-            dir = new DirectoryBuilder(parent, file.getName());
-
-        //noinspection ConstantConditions
-        for(File f: file.listFiles()) {
-            traverse(dir, f);
-        }
-        return dir;
+        return parent;
     }
 }
