@@ -2,11 +2,15 @@ package com.raf.sk.localImplementation;
 
 import com.raf.sk.specification.builders.DirectoryBuilder;
 import com.raf.sk.specification.builders.FileBuilder;
+import com.raf.sk.specification.builders.INodeBuilder;
+import com.raf.sk.specification.exceptions.IODriverException;
 import com.raf.sk.specification.io.IODriver;
 import com.raf.sk.specification.io.IOManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,9 +27,9 @@ public class LocalImplementation implements IODriver {
     @Override
     public void makeDirectory(String s) {
         Path path = Path.of(srcPath + s);
-        if(Files.exists(path)){
+        if (Files.exists(path)) {
             System.out.println("Directory already exists.");
-        }else{
+        } else {
             try {
                 Files.createDirectory(path);
                 System.out.println("[DIRECTORY]: " + path.getFileName() + " has been created!");
@@ -38,9 +42,9 @@ public class LocalImplementation implements IODriver {
     @Override
     public void makeFile(String s) {
         Path path = Path.of(srcPath + s);
-        if(Files.exists(path)){
+        if (Files.exists(path)) {
             System.out.println("File already exists.");
-        }else{
+        } else {
             try {
                 Files.createFile(path);
                 System.out.println("[FILE]: " + path.getFileName() + " has been created!");
@@ -78,7 +82,7 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
-        if(sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
+        if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
             File targetDir = new File(s1 + "\\" + sourceDir.getName());
             try {
                 Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -95,7 +99,7 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File sourceFile = new File(s);
         File targetFile = new File(s1 + "\\" + sourceFile.getName());
-        if(sourceFile.isFile()) {
+        if (sourceFile.isFile()) {
             try {
                 Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 System.out.println("[FILE]: " + sourceFile.getName() + " successfully moved to " + targetFile);
@@ -112,7 +116,7 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
-        if(sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
+        if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
             File targetDir = new File(s1 + "\\" + sourceDir.getName());
             try {
                 Files.copy(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
@@ -128,7 +132,7 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File targetPath = new File(s);
         File sourceFile = new File(s1);
-        if(sourceFile.isFile() && targetPath.isDirectory()){
+        if (sourceFile.isFile() && targetPath.isDirectory()) {
             try {
                 Files.copy(sourceFile.toPath(), targetPath.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
                 return new FileBuilder(new DirectoryBuilder(), sourceFile.getName(), sourceFile.getTotalSpace());
@@ -146,7 +150,7 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File sourceFile = new File(s);
         File targetFile = new File(s1 + "\\" + sourceFile.getName());
-        if(sourceFile.isFile()) {
+        if (sourceFile.isFile()) {
             try {
                 Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
             } catch (IOException e) {
@@ -186,26 +190,47 @@ public class LocalImplementation implements IODriver {
             this.srcPath = s;
         else
             this.srcPath = s + "/";
-        Path path = Path.of(Paths.get(s).toAbsolutePath().toString());
-        String s2 = path.getParent().toString();
-        File theFile = new File(s2);
-            if(theFile.isDirectory()) {
-                File[] files = theFile.listFiles();
-                if (files == null) {
-                    throw new RuntimeException(
-                            "LocalImplementation: files[] object is null!"
-                    );
-                }
-                if (files.length == 0) {
-                    try {
-                        Files.createDirectory(path);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return new DirectoryBuilder();
+        Path path = Path.of(Paths.get(srcPath).toAbsolutePath().toString());
+        srcPath = path.toString();
+        File root = new File(s);
+        if (root.isDirectory()) {
+            // #TODO ovo pokriva samo slučaj da je pozvan na direktorijumu koji postoji.
+            // Dodati slučaj ako je metoda pozvana na path-u koji ne postoji (kreirati novi path i vratiti prazan
+            // DirectoryBuilder)
+            return (DirectoryBuilder) traverse(null, root);
+        } else {
+            throw new IODriverException(
+                    "Cannot initiate root on file!"
+            );
+        }
+    }
 
-                }
-            }
-        return new DirectoryBuilder();
+    /**
+     * Prolazi kroz direktorijum rekurzivno i pravi DirectoryBuilder.
+     *
+     * @param parent DirectoryBuilder koji se gradi.
+     * @param file   Korenski File objekat.
+     * @return Vraća korensko DirectoryBuilder stablo.
+     */
+    private INodeBuilder traverse(DirectoryBuilder parent, File file) {
+        if (file.isFile()) {
+            return new FileBuilder(
+                    parent,
+                    file.getName(),
+                    file.length()
+            );
+        }
+
+        DirectoryBuilder dir;
+        if (parent == null)
+            dir = new DirectoryBuilder(null, DirectoryBuilder.ROOT_DIRECTORY);
+        else
+            dir = new DirectoryBuilder(parent, file.getName());
+
+        //noinspection ConstantConditions
+        for(File f: file.listFiles()) {
+            traverse(dir, f);
+        }
+        return dir;
     }
 }
