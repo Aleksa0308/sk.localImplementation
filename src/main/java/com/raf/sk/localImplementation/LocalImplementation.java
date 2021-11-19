@@ -156,13 +156,13 @@ public class LocalImplementation implements IODriver {
     }
 
     @Override
-    public String readConfig(String s) {
+    public String readConfig(String absPath) {
         String result = null;
         try {
-            result = Files.readString(Path.of(s));
+            result = Files.readString(Path.of(absPath));
         } catch (IOException e) {
             // #TODO ovde treba napraviti novi fajl
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
         return result;
