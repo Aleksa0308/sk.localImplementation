@@ -161,15 +161,15 @@ public class LocalImplementation implements IODriver {
 
     @Override
     public String readConfig(String absPath) {
-        String result = null;
+        Path path = Path.of(Paths.get(srcPath).toAbsolutePath().toString());
+        srcPath = path.getParent().toString();
         try {
-            result = Files.readString(Path.of(absPath));
+            return Files.readString(Path.of(absPath));
         } catch (IOException e) {
             // #TODO ovde treba napraviti novi fajl
             //e.printStackTrace();
             return null;
         }
-        return result;
     }
 
     @Override
@@ -185,14 +185,8 @@ public class LocalImplementation implements IODriver {
     }
 
     @Override
-    public @NotNull DirectoryBuilder initStorage(String s) {
-        if (s.endsWith("/"))
-            this.srcPath = s;
-        else
-            this.srcPath = s + "/";
-        Path path = Path.of(Paths.get(srcPath).toAbsolutePath().toString());
-        srcPath = path.toString();
-        File root = new File(s);
+    public @NotNull DirectoryBuilder initStorage() {
+        File root = new File(srcPath);
         if (root.isDirectory()) {
             // #TODO ovo pokriva samo slučaj da je pozvan na direktorijumu koji postoji.
             // Dodati slučaj ako je metoda pozvana na path-u koji ne postoji (kreirati novi path i vratiti prazan
