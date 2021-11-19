@@ -87,14 +87,21 @@ public class LocalImplementation implements IODriver {
         s1 = srcPath + s1;
         File sourceDir = new File(s);
         File targetDirTmp = new File(s1);
-        if (sourceDir.isDirectory() && targetDirTmp.isDirectory()) {
-            File targetDir = new File(s1 + "\\" + sourceDir.getName());
-            try {
-                Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("[DIRECTORY]: " + sourceDir.getName() + " successfully moved to " + targetDir);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (!sourceDir.isDirectory()) {
+            throw new IODriverException(
+                    "Source node is not a directory: " + s
+            );
+        }
+        if (!targetDirTmp.isDirectory()) {
+            throw new IODriverException(
+                    "Target node is not a directory: " + s
+            );
+        }
+        File targetDir = new File(s1 + "\\" + sourceDir.getName());
+        try {
+            Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -103,14 +110,21 @@ public class LocalImplementation implements IODriver {
         s = srcPath + s;
         s1 = srcPath + s1;
         File sourceFile = new File(s);
-        File targetFile = new File(s1 + "\\" + sourceFile.getName());
-        if (sourceFile.isFile()) {
-            try {
-                Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("[FILE]: " + sourceFile.getName() + " successfully moved to " + targetFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        File targetDir = new File(s1 + "\\" + sourceFile.getName());
+        if (!sourceFile.isDirectory()) {
+            throw new IODriverException(
+                    "Source node is not a file: " + s
+            );
+        }
+        if (!targetDir.isDirectory()) {
+            throw new IODriverException(
+                    "Target node is not a directory: " + s1
+            );
+        }
+        try {
+            Files.move(sourceFile.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
