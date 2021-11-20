@@ -113,7 +113,7 @@ public class LocalImplementation implements IODriver {
              */
             Files.move(sourceDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IODriverException(e.getMessage());
         }
     }
 
