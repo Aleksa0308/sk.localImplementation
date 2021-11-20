@@ -35,7 +35,6 @@ public class LocalImplementation implements IODriver {
         } else {
             try {
                 Files.createDirectory(path);
-                System.out.println("[DIRECTORY]: " + path.getFileName() + " has been created!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -50,7 +49,6 @@ public class LocalImplementation implements IODriver {
         } else {
             try {
                 Files.createFile(path);
-                System.out.println("[FILE]: " + path.getFileName() + " has been created!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
